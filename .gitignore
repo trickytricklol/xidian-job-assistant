@@ -1,0 +1,17 @@
+# 数据缓存与输出
+output/
+data/
+*.pyc
+__pycache__/
+
+# 个人简历（含隐私，不入库）
+resume/
+
+# 环境
+.env
+.venv/
+venv/
+
+# 系统
+.DS_Store
+Thumbs.db
