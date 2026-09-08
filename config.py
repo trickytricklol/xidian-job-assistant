@@ -20,6 +20,13 @@ OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
 EXCEL_FILENAME = "西电线下宣讲会信息汇总.xlsx"
 CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
+# 输出目标：local = 仅生成本地Excel；feishu = 本地Excel + 上传飞书在线表格
+# 命令行可用 --output-target local/feishu 临时覆盖（默认取这里的配置）
+OUTPUT_TARGET = "local"
+# 飞书表格存放文件夹 token（留空 = 存到飞书云空间根目录）
+# 获取方式：飞书云空间网页版打开目标文件夹，URL 中 .../space/<token> 一段
+FEISHU_FOLDER_TOKEN = ""
+
 # 简历（用于简历驱动推荐；支持 PDF/TXT/MD）
 RESUME_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            "resume", "resume.pdf")

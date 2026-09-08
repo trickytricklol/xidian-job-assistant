@@ -44,7 +44,7 @@ def _js_b64decode(s: str) -> str:
 
 def decode_embedded(html: str) -> str:
     """还原列表页内嵌的压缩 HTML（多层 base64 + zlib + view1d/view2d 头）"""
-    m = re.search(r'unzip\"([A-Za-z0-9+/=]+)\"', html)
+    m = re.search(r'unzip\("([A-Za-z0-9+/=]+)"\)', html)
     if not m:
         return ""
     data = zlib.decompress(base64.b64decode(m.group(1)), 15)
@@ -65,8 +65,8 @@ def decode_detail_blocks(html: str) -> List[tuple]:
     返回 [(容器id, 解码后文本), ...]，按页面出现顺序。
     """
     pat = re.compile(
-        r'#(content\d+)\"[\s\S]{0,400}?'
-        r'Base64\.decode\(unzip\(\"([A-Za-z0-9+/=]+)\"\)'
+        r'#(content\d+)"[\s\S]{0,400}?'
+        r'Base64\.decode\(unzip\("([A-Za-z0-9+/=]+)"\)'
         r'(?:\.substr\((\d+)\))?\)(?:\.substr\((\d+)\))?')
     out = []
     for cid, payload, a, b in pat.findall(html):

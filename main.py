@@ -17,6 +17,7 @@ from crawler import crawl_offline_teachins
 from resume_parser import parse_resume, describe
 from storage import (load_existing, merge_incremental, build_rows,
                      write_excel, MAIN_SHEET)
+from feishu_upload import upload_to_feishu
 
 
 def log(msg: str):
@@ -28,6 +29,10 @@ def main():
     parser.add_argument("--horizon", type=int, default=config.DEFAULT_HORIZON_DAYS,
                         help="抓取未来N天内的线下宣讲会")
     parser.add_argument("--output", default=None, help="输出Excel路径")
+    parser.add_argument("--output-target", default=config.OUTPUT_TARGET,
+                        choices=["local", "feishu"],
+                        help="输出目标：local=仅本地Excel；feishu=本地Excel+上传飞书"
+                             "在线表格（默认取 config.py 的 OUTPUT_TARGET）")
     parser.add_argument("--dump-json", default=None,
                         help="同时输出原始数据JSON（便于二次分析）")
     parser.add_argument("--from-json", default=None,
@@ -84,6 +89,16 @@ def main():
     crawl_time = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     write_excel(out_path, merged_rows, job_rows, crawl_time, args.horizon, stats)
     log(f"Excel 已写入：{out_path}")
+
+    # 4.5 可选：上传飞书在线表格
+    if args.output_target == "feishu":
+        try:
+            feishu_url = upload_to_feishu(out_path,
+                                          config.FEISHU_FOLDER_TOKEN)
+            log(f"飞书表格已创建：{feishu_url}")
+        except Exception as e:
+            log(f"飞书上传失败：{e}")
+            log(f"本地 Excel 已保留：{out_path}（可稍后手动导入或重跑本命令）")
 
     # 5. 可选 JSON
     if args.dump_json:

@@ -31,6 +31,7 @@ python main.py --horizon 30     # 抓未来30天
 python main.py --dump-json raw.json   # 同时导出原始数据JSON
 python main.py --from-json raw.json   # 用缓存JSON重建Excel（跳过抓取，秒出）
 python main.py --resume ./my_resume.pdf   # 指定简历文件（默认 resume/resume.pdf，支持 PDF/TXT/MD）
+python main.py --output-target feishu   # 整理完自动上传飞书在线表格（默认取 config.py OUTPUT_TARGET）
 ```
 
 ### Windows 一键运行（推荐）
@@ -41,6 +42,24 @@ python main.py --resume ./my_resume.pdf   # 指定简历文件（默认 resume/r
 
 > 输出 Excel 生成在 `output\西电线下宣讲会信息汇总.xlsx`。
 > 若系统无 winget（Win10 1809 以下）且未装 Python，请手动安装 Python 3.10+（勾选 *Add Python to PATH*）后重试。
+
+## ☁️ 输出到飞书（可选）
+
+整理完想把表格放到**飞书在线表格**（方便手机/网页查看、协作），两种配置方式：
+
+1. **改配置长期生效**：编辑 `config.py`，把 `OUTPUT_TARGET` 改成 `"feishu"`（默认 `"local"`）
+2. **命令行临时指定**：`python main.py --output-target feishu`
+
+### 依赖：lark-cli 是什么，要不要装
+
+`lark-cli` 是飞书（Lark）官方的命令行工具（开源项目 [larksuite/cli](https://github.com/larksuite/cli)），本工具用它把本地 Excel 导入成飞书在线表格（等价于「飞书的编程接口客户端」）。
+
+- **只用本地 Excel（默认 `local` 模式）**：**不需要** lark-cli，`install_and_run.bat` 一键包开箱即用，装好 Python 就能跑
+- **要用 `--output-target feishu` 上传飞书**：需要本机安装 lark-cli 并用**自己的飞书账号**完成一次授权登录（OAuth），之后所有调用都以该账号身份执行
+- 上传的表格默认存到**当前登录账号**的飞书云空间根目录（或 `config.py` 指定的 `FEISHU_FOLDER_TOKEN` 文件夹），表格默认为**私有**，需自行分享/开权限
+- 上传成功会打印新表格链接；失败则保留本地 Excel 并提示原因，不丢数据
+
+> 在豆包（Doubao）环境中 lark-cli 已预置并登录好用户账号，无需任何额外操作即可使用飞书上传。
 
 ## 📦 输出说明（Excel 多 sheet）
 
@@ -83,12 +102,13 @@ python main.py --resume ./my_resume.pdf   # 指定简历文件（默认 resume/r
 
 ```
 job-assistant/
-├── main.py           # CLI入口：抓取→增量合并→Excel→总结
+├── main.py           # CLI入口：抓取→增量合并→Excel→（可选）飞书上传→总结
 ├── crawler.py        # 列表页/详情页抓取与解析（含压缩内容还原）
 ├── classifier.py     # 岗位分类 + 笔试面试机会识别 + 简历匹配推荐
 ├── resume_parser.py  # 简历解析（专业/技能/意向岗位，本地规则）
 ├── storage.py        # Excel读写 + 增量更新
-├── config.py         # 抓取范围/输出路径/简历路径/专业背景等配置
+├── feishu_upload.py  # 飞书在线表格上传（可选输出目标，依赖 lark-cli）
+├── config.py         # 抓取范围/输出路径/简历路径/输出目标等配置
 ├── requirements.txt
 ├── resume/           # 简历文件（默认 resume/resume.pdf，可替换）
 ├── output/           # 生成的Excel（gitignore）
